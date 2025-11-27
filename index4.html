@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title id="page-title">AgriMind Advisor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:wght@700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: url("https://cdn.pixabay.com/photo/2022/06/22/09/29/agricultural-7277520_1280.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      min-height: 100vh;
+      display:flex; justify-content:center; align-items:center;
+      backdrop-filter: blur(4px);
+    }
+    h1 { color:black !important; font-size:4rem !important; line-height:1.1 !important; margin-bottom:.3rem !important; font-family:"Playfair Display",serif !important; font-weight:700 !important; text-shadow:1px 1px 4px rgba(0,0,0,0.2); }
+    p.subtitle { margin-top:10px; font-size:1rem; color: rgb(41,41,140); margin-bottom:1.5rem; }
+    .container { max-width:800px; width:90%; margin:2rem auto; padding:1.5rem; background:rgba(255,255,255,0.85); border-radius:15px; box-shadow:0 8px 30px rgba(0,0,0,0.25); backdrop-filter: blur(10px); position:relative; }
+    .language-toggle { position:absolute; top:15px; right:20px; display:flex; gap:15px; align-items:center; }
+    .lang-option { display:flex; gap:6px; cursor:pointer; font-size:.95rem; color:#333; font-weight:500; align-items:center; }
+    .carousel-box { width:70%; max-width:500px; height:220px; overflow:hidden; border-radius:12px; margin:1.5rem auto; box-shadow:0 4px 15px rgba(0,0,0,0.15); position:relative; }
+    .carousel-track { display:flex; width:300%; height:100%; animation:slide 15s infinite ease-in-out; }
+    .carousel-item { width:100%; height:100%; background-size:cover; background-repeat:no-repeat; background-position: top center; }
+    @keyframes slide { 0%{transform:translateX(0%);} 28%{transform:translateX(0%);} 33%{transform:translateX(-33.33%);} 61%{transform:translateX(-33.33%);} 66%{transform:translateX(-66.66%);} 95%{transform:translateX(-66.66%);} 100%{transform:translateX(0%);} }
+    .textarea-container { position:relative; width:100%; max-width:600px; margin:0 auto; }
+    textarea { width:100%; height:140px; padding:20px 50px 20px 20px; border-radius:10px; border:1px solid #a5d6a7; resize:vertical; font-size:1rem; outline:none; background:rgba(255,255,255,0.9); }
+    textarea:focus { border-color:#388e3c; box-shadow:0 0 0 3px rgba(56,142,60,0.15); }
+    .mic-icon { position:absolute; right:12px; bottom:12px; background:#2e7d32; color:#fff; border:none; border-radius:10px; width:50px; height:50px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .3s, transform .2s; font-size:1.4rem; }
+    .mic-icon.recording { background:#dc2626; }
+    .upload-btn, .analyze-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-weight:500; font-size:.95rem; transition:background .3s, transform .2s; }
+    .upload-btn { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; }
+    .upload-btn:hover { background:#c8e6c9; transform:scale(1.02); }
+    .analyze-btn { background:#0d47a1; color:white; font-weight:bold; font-size:1.1rem; }
+    .analyze-btn:hover { background:#1565c0; transform:scale(1.03); }
+    input[type="file"] { display:none; }
+    .preview-img { width:100%; max-width:300px; height:auto; max-height:150px; object-fit:cover; border-radius:8px; margin-top:1rem; border:2px solid #388e3c; }
+    .loading-spinner { border:4px solid #f3f3f3; border-top:4px solid #4CAF50; border-radius:50%; width:30px; height:30px; animation:spin 1s linear infinite; }
+    @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+    .loading-text { font-weight:bold; color:#1b5e20; }
+    #download-pdf-btn { background:#dc2626; color:#fff; padding:.5rem 1rem; border-radius:.5rem; font-weight:700; border:none; cursor:pointer; }
+    #download-pdf-btn:hover { background:#b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="container" id="main-container">
+    <div class="language-toggle">
+      <label class="lang-option"><input type="radio" name="language" value="en" checked> English</label>
+      <label class="lang-option"><input type="radio" name="language" value="hi"> हिन्दी</label>
+    </div>
+
+    <h1 id="main-title">🌿 AgriMind Advisor</h1>
+    <p id="subtitle" class="subtitle">Describe crop symptoms, speak, or upload an image to get a focused 3-day plan.</p>
+
+    <div class="carousel-box">
+      <div class="carousel-track">
+        <div class="carousel-item" style="background-image:url('https://cdn.mos.cms.futurecdn.net/CR2pAVBK3Hy7DsUoqiDsGM.jpg');"></div>
+        <div class="carousel-item" style="background-image:url('https://www.marthastewart.com/thmb/zoQ7fWpMfxlCI9_ePGnCvznHJqY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/ms-peach-tree-getty-70e44fdf9edb440888671586bf527b5d.jpg');"></div>
+        <div class="carousel-item" style="background-image:url('https://kj1bcdn.b-cdn.net/media/69598/corn-2.jpg');"></div>
+      </div>
+    </div>
+
+    <div class="form-area">
+      <div class="textarea-container">
+        <textarea id="symptom-text" placeholder="Describe crop symptoms..."></textarea>
+        <button id="mic-btn" class="mic-icon" title="Speak">🎤</button>
+      </div>
+
+      <div class="flex flex-col items-center w-full mt-4">
+        <label for="file-upload" id="upload-label" class="upload-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7h14"/></svg>
+          <span id="upload-text"> Upload Leaf Image</span>
+        </label>
+        <input type="file" id="file-upload" accept="image/*" />
+        <img id="image-preview" class="preview-img hidden" alt="Image Preview">
+        <p id="placeholder-text" class="text-gray-900 text-sm mt-2">No image selected.</p>
+      </div>
+
+      <button id="analyze-btn" class="analyze-btn mt-4 flex items-center justify-center space-x-2">
+        <span id="button-text">Analyze & Get Expert Advice</span>
+      </button>
+
+      <div id="loading-message" class="hidden mt-4 flex items-center space-x-3">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Running Deep Learning & Gemini Flash..</p>
+      </div>
+
+      <div id="message-box" class="hidden w-full mt-4 p-3 rounded-lg font-medium text-center text-sm"></div>
+    </div>
+
+    <div class="mt-4 text-right">
+      <button id="download-pdf-btn" title="Download report as PDF">⬇ Download Report PDF</button>
+    </div>
+  </div>
+
+  <script>
+    // === 🎤 Speech Recognition (continuous + 30s limit) ===
+    const micBtn = document.getElementById("mic-btn");
+    const symptomText = document.getElementById("symptom-text");
+    let recognition, isRecording = false, stopTimer;
+
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.interimResults = true;
+      recognition.continuous = true;
+
+      recognition.onstart = () => {
+        isRecording = true;
+        micBtn.classList.add("recording");
+        symptomText.placeholder = "🎧 Listening... (speak up to 30 seconds)";
+        stopTimer = setTimeout(() => recognition.stop(), 30000);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results).map(r => r[0].transcript).join(" ");
+        symptomText.value = transcript;
+      };
+
+      recognition.onerror = (e) => {
+        console.warn("Speech recognition error:", e.error);
+        micBtn.classList.remove("recording");
+      };
+
+      recognition.onend = () => {
+        clearTimeout(stopTimer);
+        isRecording = false;
+        micBtn.classList.remove("recording");
+        symptomText.placeholder = "Describe crop symptoms...";
+      };
+
+      micBtn.addEventListener("click", () => {
+        if (isRecording) recognition.stop();
+        else {
+          const selectedLang = document.querySelector('input[name="language"]:checked').value;
+          recognition.lang = selectedLang === "hi" ? "hi-IN" : "en-IN";
+          recognition.start();
+        }
+      });
+    } else {
+      micBtn.disabled = true;
+      micBtn.title = "Speech recognition not supported.";
+    }
+
+    // === 📸 Auto Image Compression (<50KB) ===
+    const fileInput = document.getElementById("file-upload");
+    const previewImg = document.getElementById("image-preview");
+    const placeholderText = document.getElementById("placeholder-text");
+
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          const width = 224, height = 224;
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          let quality = 0.7;
+          let resizedDataUrl = canvas.toDataURL("image/jpeg", quality);
+
+          while (resizedDataUrl.length / 1024 > 50 && quality > 0.1) {
+            quality -= 0.1;
+            resizedDataUrl = canvas.toDataURL("image/jpeg", quality);
+          }
+
+          previewImg.src = resizedDataUrl;
+          previewImg.classList.remove("hidden");
+          placeholderText.textContent = "✅ Image ready (224x224, <50KB)";
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // === 📄 PDF Download (Always Active) ===
+    const { jsPDF } = window.jspdf;
+    const downloadBtn = document.getElementById("download-pdf-btn");
+    const messageBox = document.getElementById("message-box");
+    const container = document.getElementById("main-container");
+
+    downloadBtn.addEventListener("click", async () => {
+      const pdf = new jsPDF("p", "pt", "a4");
+      const yOffset = 40;
+      const reportExists = !messageBox.classList.contains("hidden");
+
+      const canvas = await html2canvas(container, { scale: 1.2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, yOffset, pageWidth, imgHeight);
+
+      pdf.save(reportExists ? "AgriMind_Report.pdf" : "AgriMind_Webpage.pdf");
+    });
+  </script>
+</body>
+</html>
